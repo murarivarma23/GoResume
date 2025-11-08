@@ -12,7 +12,7 @@ export const analyzeResume = async (resumeText, jobDescription = '') => {
     throw new Error('Gemini API key not configured');
   }
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-preview-09-2025" });
 
   const prompt = `You are an expert resume analyst and career counselor. Analyze the following resume and provide detailed feedback.
 
