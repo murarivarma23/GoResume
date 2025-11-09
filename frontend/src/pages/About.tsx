@@ -14,27 +14,21 @@ const About = () => {
 
   const team = [
     {
-      name: "Sarah Chen",
-      role: "Founder & CEO",
-      bio: "Former Google recruiter with 8 years of hiring experience. Passionate about democratizing career opportunities.",
+      name: "Murari Varma",
+      role: "Web Developer",
+      bio: "Aspiring Web Developer",
       image: "/placeholder.svg"
     },
     {
-      name: "Marcus Rodriguez",
-      role: "CTO",
-      bio: "AI/ML expert from Stanford. Previously built recommendation systems at Netflix and LinkedIn.",
+      name: "Geet Avaneesh",
+      role: "Frontend and API",
+      bio: "React Developer and handling the API",
       image: "/placeholder.svg"
     },
     {
-      name: "Emily Johnson",
-      role: "Head of Design",
-      bio: "UI/UX designer with expertise in creating intuitive experiences. Former design lead at Airbnb.",
-      image: "/placeholder.svg"
-    },
-    {
-      name: "David Kim",
-      role: "Lead Engineer",
-      bio: "Full-stack engineer passionate about scalable systems. Open source contributor and tech mentor.",
+      name: "Akshith",
+      role: "Database and Deployment",
+      bio: "Cloud Deployment and Database Management expert",
       image: "/placeholder.svg"
     }
   ];
