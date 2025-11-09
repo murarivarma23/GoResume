@@ -8,12 +8,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Header } from "@/components/Header";
 import { Upload, FileText, CheckCircle, AlertCircle, XCircle, Sparkles } from "lucide-react";
+import { analyzerAPI } from "@/lib/api"; // <-- ADDED
 
 const AIAnalyzer = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [jobDescription, setJobDescription] = useState("");
   const [analysisComplete, setAnalysisComplete] = useState(false);
-  
+  const [analysisResults, setAnalysisResults] = useState<any | null>(null); // <-- REAL DATA
+  const [loading, setLoading] = useState(false); // <-- LOADING STATE
+  const [error, setError] = useState<string | null>(null); // <-- ERROR STATE
+
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -21,43 +25,20 @@ const AIAnalyzer = () => {
     }
   };
 
-  const handleAnalyzeResume = () => {
-    // This will be connected to API later
-    console.log("Analyzing resume...", { file: uploadedFile, jobDescription });
-  };
-
-  const analysisResults = {
-    overallScore: 85,
-    sections: {
-      content: { score: 90, status: "excellent" },
-      formatting: { score: 80, status: "good" },
-      ats: { score: 85, status: "good" },
-      keywords: { score: 75, status: "needs-improvement" }
-    },
-    suggestions: [
-      {
-        type: "improvement",
-        category: "Keywords",
-        message: "Add more industry-specific keywords like 'Agile', 'Scrum', 'CI/CD'",
-        priority: "high"
-      },
-      {
-        type: "warning",
-        category: "Formatting",
-        message: "Consider using bullet points instead of paragraphs in experience section",
-        priority: "medium"
-      },
-      {
-        type: "success",
-        category: "Content",
-        message: "Great use of quantified achievements",
-        priority: "low"
-      }
-    ],
-    skillAnalysis: {
-      missing: ["TypeScript", "Docker", "AWS"],
-      strong: ["React", "JavaScript", "Node.js"],
-      recommended: ["GraphQL", "MongoDB", "Redis"]
+  const handleAnalyzeResume = async () => {
+    if (!uploadedFile) return;
+    setLoading(true);
+    setError(null);
+    setAnalysisComplete(false);
+    try {
+      const res = await analyzerAPI.analyzeResume(uploadedFile, jobDescription);
+      setAnalysisResults(res.analysis || res);
+      setAnalysisComplete(true);
+    } catch (e: any) {
+      setError(e.message || "Failed to analyze resume.");
+      setAnalysisComplete(false);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -139,20 +120,32 @@ const AIAnalyzer = () => {
                   onClick={handleAnalyzeResume} 
                   variant="hero" 
                   size="lg"
-                  disabled={!uploadedFile}
+                  disabled={!uploadedFile || loading}
                   className="px-8"
                 >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Analyze Resume
+                  {loading ? (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2 animate-spin" />
+                      Analyzing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Analyze Resume
+                    </>
+                  )}
                 </Button>
                 {!uploadedFile && (
                   <p className="text-sm text-muted-foreground mt-2">
                     Please upload a resume to continue
                   </p>
                 )}
+                {error && (
+                  <p className="text-sm text-red-500 mt-2">{error}</p>
+                )}
               </div>
             </div>
-          ) : (
+          ) : analysisResults ? (
             <div className="space-y-6">
               {/* Overall Score */}
               <Card>
@@ -166,7 +159,7 @@ const AIAnalyzer = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="grid md:grid-cols-4 gap-4 mb-6">
-                    {Object.entries(analysisResults.sections).map(([key, section]) => (
+                    {Object.entries(analysisResults.sections).map(([key, section]: any) => (
                       <div key={key} className="text-center p-4 border border-border rounded-lg">
                         <div className="flex items-center justify-center mb-2">
                           {section.status === "excellent" ? (
@@ -200,7 +193,7 @@ const AIAnalyzer = () => {
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {analysisResults.suggestions.map((suggestion, index) => (
+                        {analysisResults.suggestions.map((suggestion: any, index: number) => (
                           <div key={index} className="flex items-start gap-3 p-4 border border-border rounded-lg">
                             <div className="mt-0.5">
                               {suggestion.type === "success" ? (
@@ -237,7 +230,7 @@ const AIAnalyzer = () => {
                         <div>
                           <h3 className="font-semibold mb-3 text-green-600">Strong Skills</h3>
                           <div className="space-y-2">
-                            {analysisResults.skillAnalysis.strong.map((skill, index) => (
+                            {analysisResults.skillAnalysis.strong.map((skill: string, index: number) => (
                               <Badge key={index} variant="default" className="mr-2 mb-2">{skill}</Badge>
                             ))}
                           </div>
@@ -245,7 +238,7 @@ const AIAnalyzer = () => {
                         <div>
                           <h3 className="font-semibold mb-3 text-red-600">Missing Skills</h3>
                           <div className="space-y-2">
-                            {analysisResults.skillAnalysis.missing.map((skill, index) => (
+                            {analysisResults.skillAnalysis.missing.map((skill: string, index: number) => (
                               <Badge key={index} variant="destructive" className="mr-2 mb-2">{skill}</Badge>
                             ))}
                           </div>
@@ -253,7 +246,7 @@ const AIAnalyzer = () => {
                         <div>
                           <h3 className="font-semibold mb-3 text-blue-600">Recommended</h3>
                           <div className="space-y-2">
-                            {analysisResults.skillAnalysis.recommended.map((skill, index) => (
+                            {analysisResults.skillAnalysis.recommended.map((skill: string, index: number) => (
                               <Badge key={index} variant="secondary" className="mr-2 mb-2">{skill}</Badge>
                             ))}
                           </div>
@@ -290,7 +283,7 @@ const AIAnalyzer = () => {
                         <div className="p-4 bg-secondary/5 border border-secondary/20 rounded-lg">
                           <h3 className="font-semibold mb-2">Suggested Keywords to Add:</h3>
                           <div className="flex flex-wrap gap-2 mb-4">
-                            {["Agile", "Scrum", "CI/CD", "REST APIs", "Git", "Unit Testing"].map((keyword, index) => (
+                            {["Agile", "Scrum", "CI/CD", "REST APIs", "Git", "Unit Testing"].map((keyword: string, index: number) => (
                               <Badge key={index} variant="outline">{keyword}</Badge>
                             ))}
                           </div>
@@ -314,7 +307,7 @@ const AIAnalyzer = () => {
                 </Button>
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

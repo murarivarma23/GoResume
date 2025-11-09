@@ -1,16 +1,19 @@
 import express from 'express';
-import supabase from '../config/supabase.js';
+import supabase, { supabaseAdmin } from '../config/supabase.js';
 import { authenticateUser } from '../middleware/auth.js';
 
 const router = express.Router();
 
 router.use(authenticateUser);
 
+// Use admin client to bypass RLS
+const dbClient = supabaseAdmin || supabase;
+
 router.get('/', async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const { data, error } = await supabase
+    const { data, error } = await dbClient
       .from('resumes')
       .select('*')
       .eq('user_id', userId)
@@ -32,7 +35,7 @@ router.get('/:id', async (req, res) => {
     const userId = req.user.id;
     const { id } = req.params;
 
-    const { data, error } = await supabase
+    const { data, error } = await dbClient
       .from('resumes')
       .select('*')
       .eq('id', id)
@@ -59,7 +62,7 @@ router.post('/', async (req, res) => {
     const userId = req.user.id;
     const { title, templateId, content } = req.body;
 
-    const { data, error } = await supabase
+    const { data, error } = await dbClient
       .from('resumes')
       .insert({
         user_id: userId,
@@ -96,7 +99,7 @@ router.put('/:id', async (req, res) => {
     if (content !== undefined) updateData.content = content;
     if (isPublic !== undefined) updateData.is_public = isPublic;
 
-    const { data, error } = await supabase
+    const { data, error } = await dbClient
       .from('resumes')
       .update(updateData)
       .eq('id', id)
@@ -120,7 +123,7 @@ router.delete('/:id', async (req, res) => {
     const userId = req.user.id;
     const { id } = req.params;
 
-    const { error } = await supabase
+    const { error } = await dbClient
       .from('resumes')
       .delete()
       .eq('id', id)

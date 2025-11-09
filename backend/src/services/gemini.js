@@ -3,21 +3,44 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const genAI = process.env.GEMINI_API_KEY
-  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  : null;
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  console.warn('GEMINI_API_KEY missing — AI features will throw until set.');
+}
+
+const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
+
+// Helper: extract first JSON object from freeform LLM text safely
+function extractFirstJsonObject(text) {
+  const start = text.indexOf('{');
+  if (start === -1) return null;
+
+  // naive balance matcher to the first full JSON object
+  let depth = 0;
+  for (let i = start; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    if (text[i] === '}') {
+      depth--;
+      if (depth === 0) {
+        try {
+          return JSON.parse(text.slice(start, i + 1));
+        } catch {
+          return null;
+        }
+      }
+    }
+  }
+  return null;
+}
 
 export const analyzeResume = async (resumeText, jobDescription = '') => {
-  if (!genAI) {
-    throw new Error('Gemini API key not configured');
-  }
+  if (!genAI) throw new Error('Gemini API key not configured');
 
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-preview-09-2025" });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const prompt = `You are an expert resume analyst and career counselor. Analyze the following resume and provide detailed feedback.
 
 ${jobDescription ? `Job Description:\n${jobDescription}\n\n` : ''}
-
 Resume Content:
 ${resumeText}
 
@@ -35,55 +58,44 @@ Please analyze this resume and provide:
 
 Return your analysis in the following JSON format:
 {
-  "overallScore": <number 0-100>,
+  "overallScore": 0,
   "sections": {
-    "content": { "score": <number>, "status": "<excellent|good|needs-improvement>" },
-    "formatting": { "score": <number>, "status": "<excellent|good|needs-improvement>" },
-    "ats": { "score": <number>, "status": "<excellent|good|needs-improvement>" },
-    "keywords": { "score": <number>, "status": "<excellent|good|needs-improvement>" }
+    "content": { "score": 0, "status": "good" },
+    "formatting": { "score": 0, "status": "good" },
+    "ats": { "score": 0, "status": "good" },
+    "keywords": { "score": 0, "status": "good" }
   },
   "suggestions": [
-    {
-      "type": "<improvement|warning|success>",
-      "category": "<string>",
-      "message": "<string>",
-      "priority": "<high|medium|low>"
-    }
+    { "type": "improvement", "category": "Content", "message": "…", "priority": "high" }
   ],
   "skillAnalysis": {
-    "missing": ["<skill1>", "<skill2>"],
-    "strong": ["<skill1>", "<skill2>"],
-    "recommended": ["<skill1>", "<skill2>"]
+    "missing": [],
+    "strong": [],
+    "recommended": []
   },
-  "detailedFeedback": "<string with detailed explanation>"
+  "detailedFeedback": "..."
 }
-
-Be specific, actionable, and constructive in your feedback.`;
+Return ONLY the JSON object.`;
 
   try {
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();
 
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      const analysisData = JSON.parse(jsonMatch[0]);
-      return analysisData;
-    }
+    const data = extractFirstJsonObject(text);
+    if (!data) throw new Error('Failed to parse AI response JSON');
 
-    throw new Error('Failed to parse AI response');
-  } catch (error) {
-    console.error('Gemini API error:', error);
+    return data;
+  } catch (err) {
+    console.error('Gemini API error:', err);
     throw new Error('Failed to analyze resume with AI');
   }
 };
 
 export const optimizeResumeSection = async (originalText, context = '') => {
-  if (!genAI) {
-    throw new Error('Gemini API key not configured');
-  }
+  if (!genAI) throw new Error('Gemini API key not configured');
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const prompt = `You are an expert resume writer. Optimize the following resume section to make it more impactful and ATS-friendly.
 
@@ -105,8 +117,8 @@ Return ONLY the optimized text, no explanations.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
     return response.text().trim();
-  } catch (error) {
-    console.error('Gemini optimization error:', error);
+  } catch (err) {
+    console.error('Gemini optimization error:', err);
     throw new Error('Failed to optimize resume section');
   }
 };

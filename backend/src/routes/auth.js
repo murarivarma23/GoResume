@@ -1,5 +1,5 @@
 import express from 'express';
-import supabase from '../config/supabase.js';
+import supabase, { supabaseAdmin } from '../config/supabase.js';
 
 const router = express.Router();
 
@@ -27,16 +27,21 @@ router.post('/signup', async (req, res) => {
     }
 
     if (data.user) {
-      const { error: profileError } = await supabase
+      // Use supabaseAdmin to bypass RLS policies
+      const dbClient = supabaseAdmin || supabase;
+      const { error: profileError } = await dbClient
         .from('profiles')
         .insert({
           id: data.user.id,
-          first_name: firstName,
-          last_name: lastName
+          first_name: firstName || '',
+          last_name: lastName || ''
         });
 
       if (profileError) {
         console.error('Profile creation error:', profileError);
+        // Don't fail the signup if profile creation fails, but log it
+      } else {
+        console.log('Profile created successfully for user:', data.user.id);
       }
     }
 

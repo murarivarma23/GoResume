@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Brain, Github, Eye, EyeOff, CheckCircle } from "lucide-react";
+import { authAPI } from "@/lib/api";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,6 +20,10 @@ const Signup = () => {
     confirmPassword: "",
     acceptTerms: false
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
@@ -28,10 +33,33 @@ const Signup = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle signup logic here
-    console.log("Signup attempt:", formData);
+    setError(null);
+    setSuccess(false);
+    if (!formData.acceptTerms) {
+      setError("You must accept the terms to sign up.");
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    setLoading(true);
+    try {
+      await authAPI.signUp(
+        formData.email,
+        formData.password,
+        formData.firstName,
+        formData.lastName
+      );
+      setSuccess(true);
+      setTimeout(() => navigate("/login"), 1200);
+    } catch (e: any) {
+      setError(e.message || "Signup failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const benefits = [
@@ -215,9 +243,11 @@ const Signup = () => {
                     </Label>
                   </div>
 
-                  <Button type="submit" className="w-full" variant="hero">
-                    Create Account
+                  <Button type="submit" className="w-full" variant="hero" disabled={loading}>
+                    {loading ? "Creating Account..." : "Create Account"}
                   </Button>
+                  {error && <div className="text-red-500 text-sm">{error}</div>}
+                  {success && <div className="text-green-600 text-sm">Account created! Redirecting to login…</div>}
                 </form>
 
                 <div className="relative">
