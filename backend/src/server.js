@@ -26,9 +26,11 @@ app.use(helmet());
 // CORS with dynamic origin check
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin) return cb(null, true); // curl, mobile, etc.
-    if (allowedOrigins.includes(origin)) return cb(null, true);
-    return cb(new Error(`Not allowed by CORS: ${origin}`));
+    if (!origin) return cb(null, true); // allow server-to-server or curl
+    const ok =
+      allowedOrigins.includes(origin) ||
+      /\.vercel\.app$/.test(new URL(origin).hostname); // allow vercel preview domains
+    return ok ? cb(null, true) : cb(new Error(`Not allowed by CORS: ${origin}`));
   },
   credentials: true
 }));
