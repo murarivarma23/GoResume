@@ -287,10 +287,6 @@ const AIAnalyzer = () => {
                               <Badge key={index} variant="outline">{keyword}</Badge>
                             ))}
                           </div>
-                          <Button variant="outline" size="sm">
-                            <Sparkles className="h-4 w-4 mr-2" />
-                            Auto-integrate Keywords
-                          </Button>
                         </div>
                       </div>
                     </CardContent>
@@ -301,9 +297,6 @@ const AIAnalyzer = () => {
               <div className="flex gap-4 justify-center">
                 <Button variant="outline" onClick={() => setAnalysisComplete(false)}>
                   Analyze Another Resume
-                </Button>
-                <Button variant="hero">
-                  Download Improved Resume
                 </Button>
               </div>
             </div>
