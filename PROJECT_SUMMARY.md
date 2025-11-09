@@ -349,4 +349,3 @@ VITE_API_URL=http://localhost:3001/api
 
 ## 🎉 Project Complete!
 
-All core features have been implemented and are ready for use. Follow the SETUP_GUIDE.md to get your instance running!
