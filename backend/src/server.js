@@ -12,37 +12,31 @@ import analyzerRoutes from './routes/analyzer.js';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
-
-// --- Security / CORS ---
+const PORT = process.env.PORT || 4000;
 const allowedOrigins = [
-  process.env.FRONTEND_URL,       // e.g. http://localhost:8080
+  process.env.FRONTEND_URL,       
   'http://localhost:8080',
   'http://localhost:5173'
 ].filter(Boolean);
 
 app.use(helmet());
 
-// CORS with dynamic origin check
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin) return cb(null, true); // allow server-to-server or curl
+    if (!origin) return cb(null, true); 
     const ok =
       allowedOrigins.includes(origin) ||
-      /\.vercel\.app$/.test(new URL(origin).hostname); // allow vercel preview domains
+      /\.vercel\.app$/.test(new URL(origin).hostname); 
     return ok ? cb(null, true) : cb(new Error(`Not allowed by CORS: ${origin}`));
   },
   credentials: true
 }));
 
-// Make sure preflights succeed before limiter/parsers
 app.options('*', cors());
 
-// --- Parsers ---
 app.use(express.json({ limit: '2mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// --- Rate limiter for API only ---
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -52,17 +46,14 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// --- Health ---
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'healthy', timestamp: new Date().toISOString() });
 });
 
-// --- Routes ---
 app.use('/api/auth', authRoutes);
 app.use('/api/resumes', resumeRoutes);
 app.use('/api/analyzer', analyzerRoutes);
 
-// --- Error handler ---
 app.use((err, req, res, next) => {
   console.error('Error:', err);
 
@@ -73,7 +64,6 @@ app.use((err, req, res, next) => {
     return res.status(400).json({ error: err.message });
   }
 
-  // CORS errors come here too
   if (err?.message?.startsWith('Not allowed by CORS')) {
     return res.status(403).json({ error: err.message });
   }
@@ -84,7 +74,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-// --- 404 ---
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });

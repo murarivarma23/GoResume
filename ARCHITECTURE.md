@@ -24,7 +24,7 @@
             │                                  │
 ┌───────────▼──────────────────────┐  ┌────────▼─────────────────┐
 │   EXPRESS BACKEND API            │  │   SUPABASE AUTH          │
-│   (http://localhost:3001)        │  │   (OAuth, JWT)           │
+│   (http://localhost:4000)        │  │   (OAuth, JWT)           │
 │                                  │  │                          │
 │  ┌────────────────────────────┐ │  │  - Email/Password        │
 │  │ Routes:                    │ │  │  - Google OAuth          │

@@ -246,7 +246,7 @@ created_at      timestamptz DEFAULT now()
 
 ### Backend
 ```
-PORT=3001
+PORT=4000
 NODE_ENV=development
 SUPABASE_URL=your_url
 SUPABASE_ANON_KEY=your_key
@@ -259,7 +259,7 @@ FRONTEND_URL=http://localhost:5173
 ```
 VITE_SUPABASE_URL=your_url
 VITE_SUPABASE_ANON_KEY=your_key
-VITE_API_URL=http://localhost:3001/api
+VITE_API_URL=http://localhost:4000/api
 ```
 
 ## Build Status

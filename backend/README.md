@@ -14,7 +14,7 @@ npm install
 Create a `.env` file based on `.env.example`:
 
 ```env
-PORT=3001
+PORT=4000
 NODE_ENV=development
 
 SUPABASE_URL=https://0ec90b57d6e95fcbda19832f.supabase.co
@@ -37,7 +37,7 @@ See: database/schema.sql
 npm run dev
 ```
 
-The server will start on `http://localhost:3001`
+The server will start on `http://localhost:4000`
 
 ## API Endpoints
 

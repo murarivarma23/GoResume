@@ -77,7 +77,7 @@ Edit `.env` with your credentials:
 npm run dev
 ```
 
-Backend will run on `http://localhost:3001`
+Backend will run on `http://localhost:4000`
 
 ### Frontend Setup
 
@@ -92,7 +92,7 @@ Create `.env` file in frontend directory:
 ```env
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_API_URL=http://localhost:3001/api
+VITE_API_URL=http://localhost:4000/api
 ```
 
 3. Start the frontend:
@@ -106,7 +106,7 @@ Frontend will run on `http://localhost:5173`
 
 ### Backend (.env)
 ```
-PORT=3001
+PORT=4000
 NODE_ENV=development
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_anon_key
@@ -119,7 +119,7 @@ FRONTEND_URL=http://localhost:5173
 ```
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_anon_key
-VITE_API_URL=http://localhost:3001/api
+VITE_API_URL=http://localhost:4000/api
 ```
 
 ## API Documentation
