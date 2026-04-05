@@ -123,12 +123,12 @@ Node.js 18+, npm, a [Supabase](https://supabase.com) project, a Google Gemini AP
 
 ## Skills demonstrated
 
-- Full-stack TS/JS with clear client vs server boundaries  
-- Supabase Auth in the SPA + JWT-protected Express routes  
-- Postgres schema + **RLS** for multi-tenant data  
-- REST APIs, errors, **rate limiting**  
-- Third-party AI (Gemini) with file upload pipeline  
-- Env per environment, CORS, security headers  
+- **Frontend:** React (TypeScript, Vite) — UI, routing, and calling the backend API  
+- **Backend:** Express.js REST API — routes, middleware, and JSON error handling  
+- **Database:** Supabase / PostgreSQL — schema, tables, and wiring the app to stored data  
+- **Auth:** Supabase Auth on the client + **JWT** verification on protected Express routes  
+- **AI:** Google **Gemini** — API integration, prompts, and using model output in the app  
+- **Config & deploy:** Environment variables, local vs production setup (e.g. Vercel + Render)  
 
 ---
 
