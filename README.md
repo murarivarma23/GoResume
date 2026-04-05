@@ -1,166 +1,151 @@
-# GoResume
+# GoResumeBolt
 
-AI-powered resume builder and analyzer platform built with React, Node.js, Express, and Supabase.
+**Full-stack AI resume builder and analyzer** — ATS-friendly resumes, multiple templates, and structured feedback via Google Gemini. React + Vite frontend, Express API, Supabase Auth and PostgreSQL with RLS.
 
-## Features
 
-### Core Functionality
-1. **Authentication** - Email/Password, Google OAuth, and GitHub OAuth integration
-2. **Resume Builder** - User-friendly interface with multiple ATS-friendly templates
-3. **AI Analyzer** - Intelligent resume analysis with Gemini AI providing scores and improvement suggestions
+---
 
-### Technical Highlights
-- Modern React frontend with TypeScript and Tailwind CSS
-- RESTful API backend with Express.js
-- Supabase for authentication and database
-- Google Gemini AI integration for resume analysis
-- PDF parsing and personal information removal
-- Secure file uploads and processing
+## Why this project
 
-## Project Structure
+Job seekers need resumes that pass ATS tools and read well to humans. This app mirrors real SaaS patterns: SPA auth with Supabase, JWT-protected REST APIs, Postgres with row-level security, and a third-party AI integration.
 
+---
+
+## Live demo (add your links)
+
+`https://go-resume-orcin.vercel.app/`
+
+---
+
+## What I built
+
+| Area | Highlights |
+|------|------------|
+| **Product** | Auth (email + OAuth-ready), multi-template editor, PDF AI analysis, history |
+| **Frontend** | React 18, TypeScript, Vite, Tailwind, shadcn/ui, React Router, TanStack Query |
+| **Backend** | Express (ESM), Supabase JWT verification, rate limiting, CORS, Helmet, uploads |
+| **Data** | Supabase Postgres + **RLS** on `profiles`, `resumes`, `resume_analyses` |
+| **AI** | Gemini scoring/suggestions, PDF parsing, PII-aware pipeline |
+| **DevOps** | Env-based local vs Vercel/Render, health endpoint |
+
+---
+
+## Core features
+
+- **Auth** — Supabase in the browser; Express validates JWTs on protected routes.
+- **Builder** — Nine ATS-oriented templates (e.g. Modern Professional, Tech ATS, Minimalist Pro).
+- **Analyzer** — PDF upload, optional job description, Gemini-powered feedback.
+- **Security** — Helmet, CORS allowlist, rate limits, upload limits, RLS.
+
+---
+
+## Architecture (high level)
+
+```text
+Browser (Vite + React)
+    ├── Supabase (Auth + client reads) — anon key + RLS
+    └── Express API — JWT + service role
+            ├── Supabase Postgres
+            └── Google Gemini
 ```
-GoResume/
-├── frontend/          # React + Vite + TypeScript frontend
-│   ├── src/
-│   │   ├── components/   # Reusable UI components
-│   │   ├── pages/        # Page components
-│   │   ├── lib/          # API client and utilities
-│   │   └── ...
-│   └── package.json
-│
-├── backend/           # Node.js + Express backend
-│   ├── src/
-│   │   ├── routes/      # API routes
-│   │   ├── services/    # Business logic
-│   │   ├── middleware/  # Auth and validation
-│   │   ├── config/      # Configuration files
-│   │   └── utils/       # Helper functions
-│   ├── database/        # SQL schema files
-│   └── package.json
-│
+
+More detail: `ARCHITECTURE.md`.
+
+---
+
+## Tech stack
+
+**Frontend:** React · TypeScript · Vite · Tailwind · shadcn/ui · React Router · TanStack Query · Supabase JS · Zod · React Hook Form  
+
+**Backend:** Node · Express · Supabase JS · Multer · pdf-parse · Google Generative AI · Helmet · express-rate-limit · CORS  
+
+**Platform:** Supabase (Auth + Postgres) · Vercel / Render (optional)
+
+---
+
+## Repository structure
+
+```text
+GoResumeBolt/
+├── frontend/          # React + Vite + TS — src/components, pages, lib/api.ts
+├── backend/
+│   ├── src/           # routes, services, middleware, server.js
+│   └── database/schema.sql   # run once in Supabase SQL Editor
+├── ARCHITECTURE.md
+├── PROJECT_SUMMARY.md
 └── README.md
 ```
 
-## Quick Start
+---
 
-### Prerequisites
-- Node.js (v16 or higher)
-- npm or yarn
-- Supabase account
-- Google Gemini API key
+## Prerequisites
 
-### Backend Setup
+Node.js 18+, npm, a [Supabase](https://supabase.com) project, a Google Gemini API key. Optional: Vercel + Render for deploys.
 
-1. Navigate to backend directory:
-```bash
-cd backend
-npm install
-```
+---
 
-2. Configure environment variables:
-```bash
-cp .env.example .env
-```
+## Quick start (local)
 
-Edit `.env` with your credentials:
-- Supabase URL and keys
-- Gemini API key
+1. **Database** — In Supabase **SQL Editor**, run all of `backend/database/schema.sql`.
 
-3. Set up database:
-- Go to your Supabase project
-- Open SQL Editor
-- Run the schema from `backend/database/schema.sql`
+2. **Backend**
 
-4. Start the backend server:
-```bash
-npm run dev
-```
+   ```bash
+   cd backend
+   cp .env.example .env
+   # Fill values (see comments in .env.example)
+   npm install && npm run dev
+   ```
 
-Backend will run on `http://localhost:4000`
+   Default: `http://localhost:4000` · `GET /health`
 
-### Frontend Setup
+3. **Frontend**
 
-1. Navigate to frontend directory:
-```bash
-cd frontend
-npm install
-```
+   ```bash
+   cd frontend
+   # Create .env with VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_API_URL=http://localhost:4000/api
+   npm install && npm run dev
+   ```
 
-2. Configure environment variables:
-Create `.env` file in frontend directory:
-```env
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-VITE_API_URL=http://localhost:4000/api
-```
+   App: `http://localhost:5173`
 
-3. Start the frontend:
-```bash
-npm run dev
-```
+**Environment variables:** Copy and edit `backend/.env.example` → `backend/.env`. For the frontend, mirror Supabase URL + anon key and set `VITE_API_URL` to your API base (e.g. `http://localhost:4000/api`). **Production:** set `VITE_API_URL` on Vercel to your hosted API; keep localhost in local `.env` only.
 
-Frontend will run on `http://localhost:5173`
+---
 
-## Environment Variables
+## Deployment (short)
 
-### Backend (.env)
-```
-PORT=4000
-NODE_ENV=development
-SUPABASE_URL=your_supabase_url
-SUPABASE_ANON_KEY=your_anon_key
-SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-GEMINI_API_KEY=your_gemini_api_key
-FRONTEND_URL=http://localhost:5173
-```
+- **Render (backend):** Same vars as `backend/.env`; host usually sets `PORT`. Set `FRONTEND_URL` to your Vercel URL. Redeploy after env changes.
+- **Vercel (frontend):** `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_API_URL` = production API (`https://…/api`). Redeploy after changes.
+- **Supabase:** **Authentication → URL configuration** — Site URL and redirect URLs = production frontend domain.
 
-### Frontend (.env)
-```
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_anon_key
-VITE_API_URL=http://localhost:4000/api
-```
+---
 
-## API Documentation
+## Skills demonstrated
 
-See `backend/README.md` for detailed API documentation.
+- Full-stack TS/JS with clear client vs server boundaries  
+- Supabase Auth in the SPA + JWT-protected Express routes  
+- Postgres schema + **RLS** for multi-tenant data  
+- REST APIs, errors, **rate limiting**  
+- Third-party AI (Gemini) with file upload pipeline  
+- Env per environment, CORS, security headers  
 
-## Resume Templates
+---
 
-The app includes several ATS-friendly resume templates:
-- Modern Professional
-- Executive Classic
-- Academic Scholar
-- Creative Portfolio
-- Startup Innovator
-- Minimalist Pro
-- ATS Classic
-- Simple ATS
-- Tech ATS
+## More docs
 
-## Technologies Used
+- **API routes:** `backend/README.md`  
+- **Architecture:** `ARCHITECTURE.md`  
+- **Feature / schema summary:** `PROJECT_SUMMARY.md`  
 
-### Frontend
-- React 18
-- TypeScript
-- Vite
-- Tailwind CSS
-- Shadcn UI
-- React Router
-- Supabase Client
-- React Query
-
-### Backend
-- Node.js
-- Express.js
-- Supabase (Auth & Database)
-- Google Gemini AI
-- Multer (File uploads)
-- PDF-Parse
-- Helmet (Security)
-- CORS
+---
 
 ## License
 
 ISC
+
+---
+
+## Author
+
+**Murari Varma Mudunuri** · [murari23@gmail.com](mailto:murari23@gmail.com)
